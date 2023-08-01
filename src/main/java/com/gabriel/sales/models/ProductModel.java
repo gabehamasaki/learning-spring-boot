@@ -37,5 +37,4 @@ public class ProductModel extends RepresentationModel<ProductModel> implements S
   public void setValue(BigDecimal value) {
     this.value = value;
   }
-  
 }

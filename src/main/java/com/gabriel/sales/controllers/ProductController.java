@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gabriel.sales.dtos.ProductRecordDto;
@@ -22,14 +24,24 @@ import com.gabriel.sales.models.ProductModel;
 import com.gabriel.sales.repositories.ProductRepository;
 import com.gabriel.sales.utils.Response;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
+@RequestMapping(value = "/products", produces = { "application/json" })
+@Tag(name =  "Learn Spring Boot Application")
 public class ProductController {
   @Autowired
   ProductRepository productRepository;
 
-  @PostMapping("/products")
+  @Operation(summary =  "Create a new product", method = "POST")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "201", description = "Successefully created a new product")
+  })
+  @PostMapping()
   public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
     var productModel = new ProductModel();
     BeanUtils.copyProperties(productRecordDto, productModel);
@@ -39,7 +51,11 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.CREATED).body(product);
   }
 
-  @GetMapping("/products")
+  @Operation(summary =  "List all products", method = "GET")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "All products")
+  })
+  @GetMapping()
   public ResponseEntity<List<ProductModel>> showAllProducts() {
     List<ProductModel> productsList = productRepository.findAll();
     
@@ -53,7 +69,12 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(productsList); 
   }
 
-  @GetMapping("/products/{id}")
+  @Operation(summary =  "List unique product by id", method = "GET")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Product successfully retrieved"),
+    @ApiResponse(responseCode = "404", description = "Product not found"),
+  })
+  @GetMapping("/{id}")
   public ResponseEntity<Object> showProduct(@PathVariable UUID id) {
     Optional<ProductModel> product = productRepository.findById(id);
 
@@ -64,7 +85,12 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(product.get());
   }
 
-  @PutMapping("/products/{id}")
+  @Operation(summary =  "Update product by id", method = "PUT")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Product successfully updated"),
+    @ApiResponse(responseCode = "404", description = "Product not found"),
+  })
+  @PutMapping("/{id}")
   public ResponseEntity<Object> updateProduct(@PathVariable UUID id, @RequestBody @Valid ProductRecordDto productRecordDto) {
     Optional<ProductModel> validateProduct = productRepository.findById(id);
         if (validateProduct.isEmpty()) {
@@ -79,7 +105,12 @@ public class ProductController {
     return ResponseEntity.status(HttpStatus.OK).body(product);
   }
 
-  @DeleteMapping("/products/{id}")
+  @Operation(summary =  "Delete product by id", method = "DELETE")
+  @ApiResponses(value = {
+    @ApiResponse(responseCode = "200", description = "Product successfully deleted"),
+    @ApiResponse(responseCode = "404", description = "Product not found"),
+  })
+  @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteProduct(@PathVariable UUID id) {
     Optional<ProductModel> product = productRepository.findById(id);
     if (product.isEmpty()) {
