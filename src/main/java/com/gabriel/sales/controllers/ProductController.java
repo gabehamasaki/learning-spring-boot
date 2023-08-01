@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/products", produces = { "application/json" })
-@Tag(name =  "Learn Spring Boot Application")
+@Tag(name =  "Products Routes")
 public class ProductController {
   @Autowired
   ProductRepository productRepository;
