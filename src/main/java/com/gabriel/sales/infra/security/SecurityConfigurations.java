@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,15 +22,24 @@ public class SecurityConfigurations {
   @Autowired
   SecurityFilter securityFilter;
   
+  
+  private static final String[] AUTH_WHITE_LIST = {
+    "/v3/api-docs/**",
+    "/swagger-ui/**",
+    "/v2/api-docs/**",
+    "/swagger-resources/**"
+  };
+
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
       return httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorizes -> authorizes
+                .authorizeHttpRequests(authorizes -> authorizes      
+                        .requestMatchers(AUTH_WHITE_LIST).permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/products").hasRole("ADMIN").anyRequest().authenticated()
+                        .requestMatchers("/products").hasRole("ADMIN").anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
